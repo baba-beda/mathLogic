@@ -15,6 +15,7 @@ public class Task1 {
 
             // here is the name of test-file, but i don't now its exact name
             in = new Scanner(new File("test.in"));
+            long startTime = System.currentTimeMillis();
 
             // arraylist that holds all statements of the proof
             ArrayList<String> proof = new ArrayList<String>();
@@ -80,6 +81,8 @@ public class Task1 {
             if (correct) {
                 System.out.println("Proof is correct");
             }
+            long finishTime = System.currentTimeMillis();
+            System.out.print((finishTime - startTime) / 1000);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -93,7 +93,7 @@ public class Parser {
         return 0;
     }
 
-    boolean isAxiom(int number) throws ParseException {
+    private boolean isAxiom(int number) throws ParseException {
         Stack<String> newStack = new Stack<String>();
         Stack<String> auxStack = new Stack<String>();
         String a, b, c, q;
@@ -361,5 +361,34 @@ public class Parser {
             }
             return result;
         }
+    }
+
+    public String parseAlpha(String assumption) {
+        String alpha = "(";
+        int position = assumption.indexOf("|-");
+        for (int i = 0; i < position; i++) {
+            char token = assumption.charAt(i);
+            if (token == ',') {
+                alpha += ")|(";
+            }
+            else {
+                alpha += token;
+            }
+        }
+        return alpha + ")";
+    }
+
+    public String parseBeta(String assumption) {
+        int position = assumption.indexOf("|-");
+        return assumption.substring(position + 2);
+    }
+
+    public String reParse(String statement) throws ParseException{
+        parse(statement);
+        Stack<String> auxStack = new Stack<String>();
+        for (String token : stackRPN) {
+            compileStack(auxStack, token);
+        }
+        return auxStack.firstElement();
     }
 }
