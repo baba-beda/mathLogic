@@ -1,7 +1,8 @@
+import expression.Expression;
+import expression.Implication;
+
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.Stack;
+import java.util.*;
 
 
 /**
@@ -19,101 +20,125 @@ public class Task2 {
 
             in = new Scanner(new File("tsk2.in"));
             String assumption = in.next().replace("->", ">");
-            String alpha = parser.parseAlpha(assumption), beta = parser.parseBeta(assumption);
-            alpha = parser.reParse(alpha);
+            String alphaStr = parser.parseAlpha(assumption), betaStr = parser.parseBeta(assumption);
 
-            System.out.print(alpha + "\n" + beta + "\n");
+            Expression alpha = parser.parse(alphaStr), beta = parser.parse(betaStr);
+
+            System.out.print(alphaStr + "\n" + betaStr + "\n");
 
             String statement;
 
-            ArrayList<String> proof = new ArrayList<String>();
-            ArrayList<String> reasons = new ArrayList<String>();
-
-            ArrayList<String> sourceProof = new ArrayList<String>();
-
-            // arraylist that holds statements, which were found to be result of MP
-            ArrayList<String> resultMP = new ArrayList<String>();
-            // arraylist that holds number of statement alpha->beta and number of statement alpha
-            ArrayList<Pair> resultMPSources = new ArrayList<Pair>();
-
             Stack<String> auxStack;
+
+            // number of current expression in full proof
             int i = 0;
 
+            //number of current expression in source proof
+            int j = 0;
+
+            HashMap<Expression, Integer> sourceProof = new HashMap<Expression, Integer>();
+            HashMap<Expression, Expression> sourcesMP = new HashMap<Expression, Expression>();
+            HashMap<Expression, Pair> resultMP = new HashMap<Expression, Pair>();
+
+
+            ArrayList<Expression> sourceProofAux = new ArrayList<Expression>();
+
+            HashMap<Expression, Integer> proof = new HashMap<Expression, Integer>();
+            ArrayList<String> resultProof = new ArrayList<String>();
+            ArrayList<String> basis = new ArrayList<String>();
+
+
+
             while (in.hasNext()) {
+                j++;
                 statement = in.next();
                 statement = statement.replace("->", ">");
 
-                statement = parser.reParse(statement);
+                Expression expr = parser.parse(statement);
+                sourceProof.put(expr, j);
+                sourceProofAux.add(expr);
 
-                sourceProof.add(statement);
                 int a = parser.isAxiom();
 
-                auxStack = parser.compileStack(true);
-                if (auxStack !=  null && sourceProof.contains(auxStack.firstElement())) {
-                    resultMP.add(auxStack.lastElement());
-                    resultMPSources.add(new Pair(sourceProof.indexOf(auxStack.firstElement()), sourceProof.indexOf(statement)));
+                if (a > 0) {
+                    proof.put(expr, ++i);
+                    resultProof.add(expr.toString());
+                    basis.add("axiom " + a);
+
+                    proof.put(new Implication(expr, new Implication(alpha, expr)), ++i);
+                    resultProof.add((new Implication(expr, new Implication(alpha, expr))).toString());
+                    basis.add("axiom " + 1);
+
+                    proof.put(new Implication(alpha, expr), ++i);
+                    resultProof.add((new Implication(alpha, expr)).toString());
+                    basis.add("MP " + (i - 2) + ", " + (i - 1));
                 }
 
-                // maybe we have in proof statement (alpha->beta), so current statement is alpha, and we can get beta
-                for (int j = 0; j < proof.size() - 1; j++) {
-                    parser.parse(proof.get(j));
-                    auxStack = parser.compileStack(false);
-                    if (auxStack != null && auxStack.firstElement().equals(statement)) {
-                        resultMP.add(auxStack.lastElement());
-                        resultMPSources.add(new Pair(proof.indexOf(statement) + 1, j + 1));
+                else if (alphaStr.contains(statement)) {
+                    Expression resultFinishExpr = new Implication(alpha, expr);
+                    Expression axiom1SmallExpr = new Implication(expr, resultFinishExpr);
+                    Expression axiom1BigExpr = new Implication(expr, new Implication(resultFinishExpr, expr));
+                    Expression resultInterExpr = new Implication(axiom1BigExpr, resultFinishExpr);
+                    Expression axiom2Expr = new Implication(axiom1SmallExpr, resultInterExpr);
+
+                    proof.put(axiom1SmallExpr, ++i);
+                    resultProof.add(axiom1SmallExpr.toString());
+                    basis.add("axiom " + 1);
+
+                    proof.put(axiom2Expr, ++i);
+                    resultProof.add(axiom2Expr.toString());
+                    basis.add("axiom " + 2);
+
+                    proof.put(resultInterExpr, ++i);
+                    resultProof.add(resultInterExpr.toString());
+                    basis.add("MP " + (i - 2) + ", " + (i - 1));
+
+                    proof.put(axiom1BigExpr, ++i);
+                    resultProof.add(axiom1BigExpr.toString());
+                    basis.add("axiom " + 1);
+
+                    proof.put(resultFinishExpr, ++i);
+                    resultProof.add(resultFinishExpr.toString());
+                    basis.add("MP " + (i - 1) + ", " + (i - 2));
+                }
+
+                else if (resultMP.containsKey(expr)) {
+                    Expression result = new Implication(alpha, expr);
+                    Expression deltaJ = sourceProofAux.get(resultMP.get(expr).first - 1);
+                    Expression deltaK = new Implication(deltaJ, expr);
+                    Expression auxJ = new Implication(alpha, deltaJ);
+                    Expression auxK = new Implication(alpha, deltaK);
+                    Expression resultInt = new Implication(auxK, result);
+                    Expression auxAxiom2 = new Implication(auxJ, resultInt);
+
+                    proof.put(auxAxiom2, ++i);
+                    resultProof.add(auxAxiom2.toString());
+                    basis.add("axiom " + 2);
+
+                    proof.put(resultInt, ++i);
+                    resultProof.add(resultInt.toString());
+                    basis.add("MP " + proof.get(auxJ) + ", " + (i - 1));
+
+                    proof.put(result, ++i);
+                    resultProof.add(result.toString());
+                    basis.add("MP " + proof.get(auxK) + ", " + (i - 1));
+                }
+
+                if (sourcesMP.containsKey(expr)) {
+                    resultMP.put(sourcesMP.get(expr), new Pair(j, sourceProof.get(new Implication(expr, sourcesMP.get(expr)))));
+                }
+
+                if (expr instanceof Implication) {
+                    sourcesMP.put(((Implication) expr).left, ((Implication) expr).right);
+                    if (sourceProof.containsKey(((Implication) expr).left)) {
+                        resultMP.put(((Implication) expr).right, new Pair(sourceProof.get(((Implication) expr).left), j));
                     }
-                }
-
-                if (a != 0) {
-                    i += 3;
-                    reasons.add("axiom " + a);
-                    proof.add(statement);
-                    reasons.add("axiom 1");
-                    proof.add(parser.reParse(statement + ">" + alpha + ">" + statement));
-                    reasons.add("MP " + (i - 2) + ", " + (i - 1));
-                    proof.add(parser.reParse(alpha + ">" + statement));
-                }
-
-                else if (alpha.indexOf(statement) > 0) {
-                    i += 5;
-                    String ax1 = "(" + statement + ">(" + statement + ">" + statement + "))";
-                    String ax1_1 = "(" + statement + ">((" + statement + ">" + statement + ")>" + statement + "))";
-                    String res = "(" + statement + ">" + statement + ")";
-                    reasons.add("axiom 1");
-                    proof.add(ax1);
-                    reasons.add("axiom 2");
-                    proof.add(parser.reParse(ax1 + ">" + ax1_1 + ">" + res));
-                    reasons.add("MP " + (i - 4) + ", " + (i - 3));
-                    proof.add(parser.reParse(ax1_1 + ">" + res));
-                    reasons.add("axiom 1");
-                    proof.add(ax1_1);
-                    reasons.add("MP " + (i - 1) + ", " + (i - 2));
-                    proof.add(res);
-                }
-
-                else if (resultMP.contains(statement)) {
-                    i += 3;
-                    reasons.add("axiom 2");
-                    proof.add("(" + alpha + ">" + sourceProof.get(resultMPSources.get(resultMP.indexOf(statement)).first) + ")>(("
-                            + alpha + ">" + sourceProof.get((resultMPSources.get(resultMP.indexOf(statement)).second)) + ")>("
-                    + alpha + ">" + statement + "))");
-
-                    String st1 = parser.reParse(alpha + ">" + sourceProof.get(resultMPSources.get(resultMP.indexOf(statement)).first));
-                    int index1 = proof.indexOf(st1);
-                    String st2 = parser.reParse(alpha + ">" + sourceProof.get((resultMPSources.get(resultMP.indexOf(statement)).second)));
-                    int index2 = proof.indexOf(st2);
-
-                    reasons.add("MP " + (index1 + 1) + ", " + (i - 2));
-
-                    proof.add("((" + alpha + ">" + sourceProof.get((resultMPSources.get(resultMP.indexOf(statement)).second)) + ")>("
-                            + alpha + ">" + statement + "))");
-                    reasons.add("MP " + (index2 + 1) + ", " + (i - 1));
-                    proof.add("(" + alpha + ">" + statement + ")");
                 }
             }
 
-            for (int j = 0; j < proof.size(); j++) {
-                System.out.println((j + 1) + ": " + reasons.get(j) + " " + proof.get(j));
+
+            for (int k = 0; k < resultProof.size(); k++) {
+                System.out.println((k + 1) + ") " + basis.get(k) + " " + resultProof.get(k));
             }
 
 
@@ -131,5 +156,4 @@ public class Task2 {
             this.second = second;
         }
     }
-
 }

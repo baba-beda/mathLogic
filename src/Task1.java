@@ -1,5 +1,9 @@
+import expression.Expression;
+import expression.Implication;
+
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Stack;
 
@@ -17,29 +21,36 @@ public class Task1 {
             in = new Scanner(new File("test.in"));
             long startTime = System.currentTimeMillis();
 
-            // arraylist that holds all statements of the proof
-            ArrayList<String> proof = new ArrayList<String>();
-            // stack that holds expression divided into alpha and beta, for checking it on MP
-            Stack<String> auxStack = new Stack<String>();
-            // arraylist that holds statements, which were found to be result of MP
-            ArrayList<String> resultMP = new ArrayList<String>();
-            // arraylist that holds number of statement alpha->beta and number of statement alpha
-            ArrayList<Pair> resultMPSources = new ArrayList<Pair>();
             // number of current statement
             int i = 0;
 
+            HashMap<Expression, Integer> proof = new HashMap<Expression, Integer>();
+
+            HashMap<Expression, Expression> sourcesMP = new HashMap<Expression, Expression>();
+
+            HashMap<Expression, Pair> resultMP = new HashMap<Expression, Pair>();
+
             boolean correct = true;
+            Expression auxExpr = parser.parse("(B->(B->B))");
+
+            /*Expression one = parser.parse("A->B");
+            Expression two = parser.parse("B->(A->B)");
+            int x = one.hashCode();
+            int y = two.hashCode();
+            y = one.hashCode();*/
 
             while (in.hasNext()) {
                 i++;
-                if (auxStack != null) {
-                    auxStack.clear();
-                }
+
                 String statement = in.next();
                 // it's more comfortable to to have all operators of one symbol
                 statement = statement.replace("->", ">");
-                proof.add(statement);
-                parser.parse(statement);
+
+                Expression expr = parser.parse(statement);
+
+                proof.put(expr, i);
+
+
                 // checking if current statement is an axiom
                 int a = parser.isAxiom();
 
@@ -50,39 +61,35 @@ public class Task1 {
                     isAxiom = true;
                 }
 
-                // maybe we can get statement (beta), which is result of another statement (alpha) and this (alpha -> beta)
-                auxStack = parser.compileStack(true);
-                if (auxStack !=  null && proof.contains(auxStack.firstElement())) {
-                    resultMP.add(auxStack.lastElement());
-                    resultMPSources.add(new Pair(proof.indexOf(auxStack.firstElement()) + 1, proof.indexOf(statement) + 1));
-                }
-            
-                if (resultMP.contains(statement)) {
+                if (resultMP.containsKey(expr)) {
                     isMP = true;
                 }
-                
-                // that means that nothing prove current statement and it's incorrect
-                if (!isAxiom && !isMP) {
-                    System.out.print("Incorrect proof from line " + i);
-                    correct = false;
-                    break;
+
+                if (sourcesMP.containsKey(expr)) {
+                    resultMP.put(sourcesMP.get(expr), new Pair(i, proof.get(new Implication(expr, sourcesMP.get(expr)))));
                 }
-            
-                // maybe we have in proof statement (alpha->beta), so current statement is alpha, and we can get beta 
-                for (int j = 0; j < proof.size() - 1; j++) {
-                    parser.parse(proof.get(j));
-                    auxStack = parser.compileStack(false);
-                    if (auxStack != null && auxStack.firstElement().equals(statement)) {
-                        resultMP.add(auxStack.lastElement());
-                        resultMPSources.add(new Pair(proof.indexOf(statement) + 1, j + 1));
+
+                if (expr instanceof Implication) {
+                    sourcesMP.put(((Implication) expr).left, ((Implication) expr).right);
+                    Expression left = ((Implication) expr).left;
+                    boolean klj = auxExpr.equals(((Implication) expr).left);
+                    boolean aux = (proof.get(((Implication) expr).left) != null);
+                    if (proof.containsKey(((Implication) expr).left)) {
+                        resultMP.put(((Implication) expr).right, new Pair(proof.get(((Implication) expr).left), i));
                     }
+                }
+
+                if (!isAxiom && !isMP) {
+                    correct = false;
+                    System.out.print("Proof is incorrect beginning the statement number " + i);
+                    break;
                 }
             }
             if (correct) {
                 System.out.println("Proof is correct");
             }
             long finishTime = System.currentTimeMillis();
-            System.out.print((finishTime - startTime) / 1000);
+            System.out.print((finishTime - startTime));
 
         } catch (Exception e) {
             e.printStackTrace();
