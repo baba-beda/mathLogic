@@ -10,7 +10,7 @@ public class Parser {
     private final String OPERATORS = ">|&!";
 
     // available words
-    private final String WORDS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private final String WORDS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     // temporary stack, that holds operators and brackets
     private Stack<String> stackOperations = new Stack<String>();
@@ -72,7 +72,12 @@ public class Parser {
                 stackOperations.pop();
             }
             else if (isWord(token)) {
-                stackRPN.push(token);
+                if (WORDS.indexOf(token) >= WORDS.indexOf("0")) {
+                    stackRPN.push(stackRPN.pop() + token);
+                }
+                else {
+                    stackRPN.push(token);
+                }
             }
             else if (isOperator(token)) {
                 while (!stackOperations.isEmpty() && isOperator(stackOperations.lastElement()) &&

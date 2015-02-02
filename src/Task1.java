@@ -30,7 +30,6 @@ public class Task1 {
             HashMap<Expression, Pair> resultMP = new HashMap<Expression, Pair>();
 
             boolean correct = true;
-            Expression auxExpr = parser.parse("(B->(B->B))");
 
             while (in.hasNext()) {
                 i++;
@@ -71,7 +70,7 @@ public class Task1 {
 
                 if (!isAxiom && !isMP) {
                     correct = false;
-                    System.out.print("Proof is incorrect beginning the statement number " + i);
+                    System.out.print("Proof is incorrect from the statement number " + i);
                     break;
                 }
             }
