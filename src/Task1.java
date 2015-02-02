@@ -19,7 +19,6 @@ public class Task1 {
 
             // here is the name of test-file, but i don't now its exact name
             in = new Scanner(new File("test.in"));
-            long startTime = System.currentTimeMillis();
 
             // number of current statement
             int i = 0;
@@ -32,12 +31,6 @@ public class Task1 {
 
             boolean correct = true;
             Expression auxExpr = parser.parse("(B->(B->B))");
-
-            /*Expression one = parser.parse("A->B");
-            Expression two = parser.parse("B->(A->B)");
-            int x = one.hashCode();
-            int y = two.hashCode();
-            y = one.hashCode();*/
 
             while (in.hasNext()) {
                 i++;
@@ -71,9 +64,6 @@ public class Task1 {
 
                 if (expr instanceof Implication) {
                     sourcesMP.put(((Implication) expr).left, ((Implication) expr).right);
-                    Expression left = ((Implication) expr).left;
-                    boolean klj = auxExpr.equals(((Implication) expr).left);
-                    boolean aux = (proof.get(((Implication) expr).left) != null);
                     if (proof.containsKey(((Implication) expr).left)) {
                         resultMP.put(((Implication) expr).right, new Pair(proof.get(((Implication) expr).left), i));
                     }
@@ -88,8 +78,6 @@ public class Task1 {
             if (correct) {
                 System.out.println("Proof is correct");
             }
-            long finishTime = System.currentTimeMillis();
-            System.out.print((finishTime - startTime));
 
         } catch (Exception e) {
             e.printStackTrace();

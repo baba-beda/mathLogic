@@ -1,6 +1,7 @@
 import expression.*;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Stack;
 import java.util.StringTokenizer;
 
@@ -89,18 +90,25 @@ public class Parser {
         return expr;
     }
 
-    public int isAxiom() throws ParseException {
-        stackExpression.clear();
-        stackExpression.addAll(stackRPN);
+    public int isAxiom(Expression expression) throws ParseException {
         for (int i = 1; i <= 10; i++) {
-            if (isAxiom(i)) {
+            if (isAxiom(i, expression)) {
                 return i;
             }
         }
         return 0;
     }
 
-    private boolean isAxiom(int number) throws ParseException {
+    public int isAxiom() throws ParseException {
+        for (int i = 1; i <= 10; i++) {
+            if (isAxiom(i, expr)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    private boolean isAxiom(int number, Expression expr) throws ParseException {
         switch(number) {
             case 1:
                 return (expr instanceof Implication && ((Implication) expr).right instanceof Implication && ((Implication) expr).left.equals(((Implication) ((Implication) expr).right).right));
@@ -154,23 +162,21 @@ public class Parser {
         return false;
     }
 
-    public String parseAlpha(String assumption) {
-        String alpha = "(";
+    public ArrayList<Expression> parseAlpha(String assumption) throws ParseException {
+        ArrayList<Expression> alpha = new ArrayList<Expression>();
+        String curAss = "";
         int position = assumption.indexOf("|-");
         for (int i = 0; i < position; i++) {
             char token = assumption.charAt(i);
             if (token == ',') {
-                alpha += ")|(";
+                alpha.add(parse(curAss));
+                curAss = "";
             }
             else {
-                alpha += token;
+                curAss += token;
             }
         }
-        return alpha + ")";
-    }
-
-    public String parseBeta(String assumption) {
-        int position = assumption.indexOf("|-");
-        return assumption.substring(position + 2);
+        alpha.add(parse(curAss));
+        return alpha;
     }
 }
