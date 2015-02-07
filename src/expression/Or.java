@@ -12,4 +12,9 @@ public class Or extends Expression {
         right = parseExpression(stackRPN);
         left = parseExpression(stackRPN);
     }
+
+    public Or(Expression left, Expression right) {
+        this.left = left;
+        this.right = right;
+    }
 }

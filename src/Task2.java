@@ -1,5 +1,7 @@
 import expression.Expression;
 import expression.Implication;
+import resources.Axioms;
+import resources.Parser;
 
 import java.io.File;
 import java.util.*;
@@ -20,9 +22,11 @@ public class Task2 {
 
             in = new Scanner(new File("tsk2.in"));
             String assumption = in.next().replace("->", ">");
+
             ArrayList<Expression> alpha = parser.parseAlpha(assumption);
 
             Collections.reverse(alpha);
+
 
             // number of current expression in source proof
             int j = 0;
@@ -44,6 +48,8 @@ public class Task2 {
 
             // arrayList of statements, which prove that current expression is true
             ArrayList<String> basis = new ArrayList<String>();
+
+            Axioms axioms = new Axioms();
 
             while (in.hasNext()) {
                 j++;
@@ -68,8 +74,8 @@ public class Task2 {
                         proofAux.add(expr);
                         basis.add("axiom " + a);
 
-                        proof.put(new Implication(expr, new Implication(asmp, expr)), ++i);
-                        proofAux.add(new Implication(expr, new Implication(asmp, expr)));
+                        proof.put(axioms.createAxiom1(expr, asmp), ++i);
+                        proofAux.add(axioms.createAxiom1(expr, asmp));
                         basis.add("axiom " + 1);
 
                         proof.put(new Implication(asmp, expr), ++i);
@@ -87,8 +93,8 @@ public class Task2 {
                         }
 
                         Expression resultFinishExpr = new Implication(asmp, expr);
-                        Expression axiom1SmallExpr = new Implication(expr, resultFinishExpr);
-                        Expression axiom1BigExpr = new Implication(expr, new Implication(resultFinishExpr, expr));
+                        Expression axiom1SmallExpr = axioms.createAxiom1(expr, asmp);
+                        Expression axiom1BigExpr = axioms.createAxiom1(expr, resultFinishExpr);
                         Expression resultInterExpr = new Implication(axiom1BigExpr, resultFinishExpr);
                         Expression axiom2Expr = new Implication(axiom1SmallExpr, resultInterExpr);
 

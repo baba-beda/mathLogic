@@ -1,7 +1,10 @@
+package resources;
+
 import expression.*;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Stack;
 import java.util.StringTokenizer;
 

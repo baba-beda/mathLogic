@@ -1,11 +1,10 @@
 import expression.Expression;
 import expression.Implication;
+import resources.Parser;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
-import java.util.Stack;
 
 public class Task1 {
     public static void main(String[] args) {
@@ -52,6 +51,8 @@ public class Task1 {
                 if (a != 0) {
                     isAxiom = true;
                 }
+
+
 
                 if (resultMP.containsKey(expr)) {
                     isMP = true;

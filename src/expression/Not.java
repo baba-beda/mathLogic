@@ -12,4 +12,8 @@ public class Not extends Expression {
         subExpr = parseExpression(stackRPN);
     }
 
+    public Not(Expression expression) {
+        subExpr = expression;
+    }
+
 }

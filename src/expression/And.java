@@ -13,4 +13,8 @@ public class And extends Expression {
         left = parseExpression(stackRPN);
     }
 
+    public And(Expression left, Expression right) {
+        this.left = left;
+        this.right = right;
+    }
 }
