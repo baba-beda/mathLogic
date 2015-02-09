@@ -363,10 +363,14 @@ public class Proofs {
     }
 
     public void changeVariablesInList(ArrayList<Expression> list, Expression a) {
-        for (int i = 0; i < list.size(); i++) {
-            Expression e = list.get(i);
-            list.remove(i);
-            list.add(changeVariables(e, a));
+        ArrayList<Expression> aux = new ArrayList<Expression>();
+        for (Expression e : list) {
+            aux.add(changeVariables(e, a));
+        }
+        list.clear();
+        Iterator<Expression> ite = aux.iterator();
+        while (ite.hasNext()) {
+            list.add(ite.next().clone());
         }
     }
 }
