@@ -1,26 +1,19 @@
 package expression;
 
-import com.sun.istack.internal.Pool;
 import resources.Proofs;
 
-import javax.swing.*;
-import java.text.ParseException;
 import java.util.*;
 
 /**
  * Created by daria on 14.01.15.
  */
-
-public class Expression {
-    private int varCount;
-
+public class Expression implements Cloneable {
     private HashSet<String> variables = new HashSet<String>();
     private HashMap<String, Integer> variablesAux = new HashMap<String, Integer>();
     
 
 
     public Expression() {
-        varCount = 0;
     }
 
 
@@ -127,13 +120,16 @@ public class Expression {
         return ((Variable) this).var;
     }
 
-    public ArrayList<Expression> prove(int bitMask, Proofs proofs) {
+    public ArrayList<Expression> prove(int bitMask, Proofs proofs)  throws CloneNotSupportedException{
         ArrayList<Expression> proof = new ArrayList<Expression>();
 
         if (this instanceof Implication) {
             if (((Implication) this).left.evaluate(bitMask) && ((Implication) this).right.evaluate(bitMask)) {
+                Iterator<Expression> ite = proofs.getYesYesImpl().iterator();
                 ArrayList<Expression> yesYesImpl = new ArrayList<Expression>();
-                yesYesImpl.addAll(proofs.getYesYesImpl());
+                while (ite.hasNext()) {
+                    yesYesImpl.add(ite.next().clone());
+                }
                 proofs.changeVariablesInList(yesYesImpl, ((Implication) this).left, ((Implication) this).right);
                 proof.addAll(((Implication) this).left.prove(bitMask, proofs));
                 proof.addAll(((Implication) this).left.prove(bitMask, proofs));
@@ -141,7 +137,11 @@ public class Expression {
                 return proof;
             }
             if (!((Implication) this).left.evaluate(bitMask) && ((Implication) this).right.evaluate(bitMask)) {
-                ArrayList<Expression> noYesImpl = new ArrayList<Expression>(proofs.getNoYesImpl());
+                Iterator<Expression> ite = proofs.getNoYesImpl().iterator();
+                ArrayList<Expression> noYesImpl = new ArrayList<Expression>();
+                while (ite.hasNext()) {
+                    noYesImpl.add(ite.next().clone());
+                }
                 proofs.changeVariablesInList(noYesImpl, ((Implication) this).left, ((Implication) this).right);
                 proof.addAll(new Not(((Implication) this).left).prove(bitMask, proofs));
                 proof.addAll(((Implication) this).left.prove(bitMask, proofs));
@@ -149,7 +149,11 @@ public class Expression {
                 return proof;
             }
             if (!((Implication) this).left.evaluate(bitMask) && !((Implication) this).right.evaluate(bitMask)) {
-                ArrayList<Expression> noNoImpl = new ArrayList<Expression>(proofs.getNoNoImpl());
+                Iterator<Expression> ite = proofs.getNoNoImpl().iterator();
+                ArrayList<Expression> noNoImpl = new ArrayList<Expression>();
+                while (ite.hasNext()) {
+                    noNoImpl.add(ite.next().clone());
+                }
                 proofs.changeVariablesInList(noNoImpl, ((Implication) this).left, ((Implication) this).right);
                 proof.addAll(new Not(((Implication) this).left).prove(bitMask, proofs));
                 proof.addAll(new Not(((Implication) this).left).prove(bitMask, proofs));
@@ -286,5 +290,14 @@ public class Expression {
         return hash;
     }
 
-
+    @Override
+    public Expression clone() {
+        Expression clone;
+        try {
+            clone = (Expression) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
+        }
+        return clone;
+    }
 }

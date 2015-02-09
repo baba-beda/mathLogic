@@ -4,6 +4,7 @@ import expression.*;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Scanner;
 
 /**
@@ -192,10 +193,10 @@ public class Proofs {
         if (expression instanceof Implication) {
             if (((Implication) expression).left instanceof Variable) {
                 if (((Variable) ((Implication) expression).left).var.equals("A")) {
-                    ((Implication) expression).left = a;
+                    ((Implication) expression).left = a.clone();
                 }
                 else {
-                    ((Implication) expression).left = b;
+                    ((Implication) expression).left = b.clone();
                 }
             }
             else {
@@ -204,10 +205,10 @@ public class Proofs {
 
             if (((Implication) expression).right instanceof Variable) {
                 if (((Variable) ((Implication) expression).right).var.equals("A")) {
-                    ((Implication) expression).right = a;
+                    ((Implication) expression).right = a.clone();
                 }
                 else {
-                    ((Implication) expression).right = b;
+                    ((Implication) expression).right = b.clone();
                 }
             }
             else {
@@ -217,10 +218,10 @@ public class Proofs {
         else if (expression instanceof Or) {
             if (((Or) expression).left instanceof Variable) {
                 if (((Variable) ((Or) expression).left).var.equals("A")) {
-                    ((Or) expression).left = a;
+                    ((Or) expression).left = a.clone();
                 }
                 else {
-                    ((Or) expression).left = b;
+                    ((Or) expression).left = b.clone();
                 }
             }
             else {
@@ -229,10 +230,10 @@ public class Proofs {
 
             if (((Or) expression).right instanceof Variable) {
                 if (((Variable) ((Or) expression).right).var.equals("A")) {
-                    ((Or) expression).right = a;
+                    ((Or) expression).right = a.clone();
                 }
                 else {
-                    ((Or) expression).right = b;
+                    ((Or) expression).right = b.clone();
                 }
             }
             else {
@@ -242,10 +243,10 @@ public class Proofs {
         else if (expression instanceof And) {
             if (((And) expression).left instanceof Variable) {
                 if (((Variable) ((And) expression).left).var.equals("A")) {
-                    ((And) expression).left = a;
+                    ((And) expression).left = a.clone();
                 }
                 else {
-                    ((And) expression).left = b;
+                    ((And) expression).left = b.clone();
                 }
             }
             else {
@@ -254,10 +255,10 @@ public class Proofs {
 
             if (((And) expression).right instanceof Variable) {
                 if (((Variable) ((And) expression).right).var.equals("A")) {
-                    ((And) expression).right = a;
+                    ((And) expression).right = a.clone();
                 }
                 else {
-                    ((And) expression).right = b;
+                    ((And) expression).right = b.clone();
                 }
             }
             else {
@@ -267,10 +268,10 @@ public class Proofs {
         else if (expression instanceof Not) {
             if (((Not) expression).subExpr instanceof Variable) {
                 if (((Variable) ((Not) expression).subExpr).var.equals("A")) {
-                    ((Not) expression).subExpr = a;
+                    ((Not) expression).subExpr = a.clone();
                 }
                 else {
-                    ((Not) expression).subExpr = b;
+                    ((Not) expression).subExpr = b.clone();
                 }
             }
             else {
@@ -350,11 +351,14 @@ public class Proofs {
     }
 
     public void changeVariablesInList(ArrayList<Expression> list, Expression a, Expression b) {
-        for (int i = 0; i < list.size(); i++) {
-            Expression e = list.get(i);
-            list.remove(i);
-            list.add(i, changeVariables(e, a, b));
-
+        ArrayList<Expression> aux = new ArrayList<Expression>();
+        for (Expression e : list) {
+            aux.add(changeVariables(e, a, b));
+        }
+        list.clear();
+        Iterator<Expression> ite = aux.iterator();
+        while (ite.hasNext()) {
+            list.add(ite.next().clone());
         }
     }
 

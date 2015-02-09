@@ -56,7 +56,7 @@ public class Task3 {
             ArrayList<Expression>[] interProofs = new ArrayList[counter];
 
             for (int bitMask = 0; bitMask < counter; bitMask++) {
-                interProofs[bitMask] = statement.prove(bitMask, proofs);
+                interProofs[bitMask] = new ArrayList<Expression>(statement.prove(bitMask, proofs));
             }
 
             for (int i = 1; i < counter; i *= 2) {
