@@ -2,7 +2,7 @@ import expression.Expression;
 import expression.Implication;
 import resources.Parser;
 
-import java.io.*;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -28,6 +28,7 @@ public class Task1 {
 
             HashMap<Expression, Pair> resultMP = new HashMap<Expression, Pair>();
 
+
             boolean correct = true;
 
             while (in.hasNext()) {
@@ -38,6 +39,8 @@ public class Task1 {
                 statement = statement.replace("->", ">");
 
                 Expression expr = parser.parse(statement);
+
+                String basis = "";
 
                 proof.put(expr, i);
 
@@ -50,12 +53,13 @@ public class Task1 {
 
                 if (a != 0) {
                     isAxiom = true;
+                    basis = "axiom " + a;
                 }
-
 
 
                 if (resultMP.containsKey(expr)) {
                     isMP = true;
+                    basis = "M.P. " + resultMP.get(expr).first + ", " + resultMP.get(expr).second;
                 }
 
                 if (sourcesMP.containsKey(expr)) {
@@ -69,11 +73,17 @@ public class Task1 {
                     }
                 }
 
+
                 if (!isAxiom && !isMP) {
+                    System.out.println(i + ")" + expr.toString() + " " + "Unproved");
                     correct = false;
                     System.out.print("Proof is incorrect from the statement number " + i);
                     break;
                 }
+
+                System.out.println(i + ") " + expr.toString() + " " + basis);
+
+
             }
             if (correct) {
                 System.out.println("Proof is correct");

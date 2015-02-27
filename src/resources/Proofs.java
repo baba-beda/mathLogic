@@ -190,6 +190,7 @@ public class Proofs {
     }
 
     private Expression changeVariables(Expression expression, Expression a, Expression b) {
+        Expression aux = expression.clone();
         if (expression instanceof Implication) {
             if (((Implication) expression).left instanceof Variable) {
                 if (((Variable) ((Implication) expression).left).var.equals("A")) {
@@ -356,9 +357,8 @@ public class Proofs {
             aux.add(changeVariables(e, a, b));
         }
         list.clear();
-        Iterator<Expression> ite = aux.iterator();
-        while (ite.hasNext()) {
-            list.add(ite.next().clone());
+        for (Expression expr : aux) {
+            list.add(expr.clone());
         }
     }
 

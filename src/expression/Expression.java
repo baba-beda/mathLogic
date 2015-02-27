@@ -120,15 +120,14 @@ public class Expression implements Cloneable {
         return ((Variable) this).var;
     }
 
-    public ArrayList<Expression> prove(int bitMask, Proofs proofs)  throws CloneNotSupportedException{
+    public ArrayList<Expression> prove(int bitMask, Proofs proofs)  throws CloneNotSupportedException {
         ArrayList<Expression> proof = new ArrayList<Expression>();
 
         if (this instanceof Implication) {
             if (((Implication) this).left.evaluate(bitMask) && ((Implication) this).right.evaluate(bitMask)) {
-                Iterator<Expression> ite = proofs.getYesYesImpl().iterator();
                 ArrayList<Expression> yesYesImpl = new ArrayList<Expression>();
-                while (ite.hasNext()) {
-                    yesYesImpl.add(ite.next().clone());
+                for (Expression e : proofs.getYesYesImpl()) {
+                    yesYesImpl.add(e.clone());
                 }
                 proofs.changeVariablesInList(yesYesImpl, ((Implication) this).left, ((Implication) this).right);
                 proof.addAll(((Implication) this).left.prove(bitMask, proofs));
@@ -137,10 +136,9 @@ public class Expression implements Cloneable {
                 return proof;
             }
             if (!((Implication) this).left.evaluate(bitMask) && ((Implication) this).right.evaluate(bitMask)) {
-                Iterator<Expression> ite = proofs.getNoYesImpl().iterator();
                 ArrayList<Expression> noYesImpl = new ArrayList<Expression>();
-                while (ite.hasNext()) {
-                    noYesImpl.add(ite.next().clone());
+                for (Expression e : proofs.getNoYesImpl()) {
+                    noYesImpl.add(e.clone());
                 }
                 proofs.changeVariablesInList(noYesImpl, ((Implication) this).left, ((Implication) this).right);
                 proof.addAll(new Not(((Implication) this).left).prove(bitMask, proofs));
@@ -293,10 +291,20 @@ public class Expression implements Cloneable {
     @Override
     public Expression clone() {
         Expression clone;
-        try {
-            clone = (Expression) super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
+        if (this instanceof Implication) {
+            clone = new Implication(((Implication) this).left.clone(), ((Implication) this).right.clone());
+        }
+        else if (this instanceof Or) {
+            clone = new Or(((Or) this).left.clone(), ((Or) this).right.clone());
+        }
+        else if (this instanceof And) {
+            clone = new And(((And) this).left.clone(), ((And) this).right.clone());
+        }
+        else if (this instanceof Not) {
+            clone = new Not(((Not) this).subExpr.clone());
+        }
+        else {
+            clone = new Variable(((Variable) this).var);
         }
         return clone;
     }

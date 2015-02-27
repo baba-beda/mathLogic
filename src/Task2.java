@@ -80,7 +80,7 @@ public class Task2 {
 
                         proof.put(new Implication(asmp, expr), ++i);
                         proofAux.add(new Implication(asmp, expr));
-                        basis.add("MP " + (i - 2) + ", " + (i - 1));
+                        basis.add("M.P. " + (i - 2) + ", " + (i - 1));
                     }
 
                     else if (alpha.contains(expr)) {
@@ -108,7 +108,7 @@ public class Task2 {
 
                         proof.put(resultInterExpr, ++i);
                         proofAux.add(resultInterExpr);
-                        basis.add("MP " + (i - 2) + ", " + (i - 1));
+                        basis.add("M.P. " + (i - 2) + ", " + (i - 1));
 
                         proof.put(axiom1BigExpr, ++i);
                         proofAux.add(axiom1BigExpr);
@@ -116,7 +116,7 @@ public class Task2 {
 
                         proof.put(resultFinishExpr, ++i);
                         proofAux.add(resultFinishExpr);
-                        basis.add("MP " + (i - 1) + ", " + (i - 2));
+                        basis.add("M.P. " + (i - 1) + ", " + (i - 2));
                     }
 
                     else if (resultMP.containsKey(expr)) {
@@ -134,11 +134,11 @@ public class Task2 {
 
                         proof.put(resultInt, ++i);
                         proofAux.add(resultInt);
-                        basis.add("MP " + proof.get(auxJ) + ", " + (i - 1));
+                        basis.add("M.P. " + proof.get(auxJ) + ", " + (i - 1));
 
                         proof.put(result, ++i);
                         proofAux.add(result);
-                        basis.add("MP " + proof.get(auxK) + ", " + (i - 1));
+                        basis.add("M.P. " + proof.get(auxK) + ", " + (i - 1));
                     }
 
                     else if (alpha.contains(expr)) {
@@ -170,7 +170,7 @@ public class Task2 {
 
 
             for (int k = 0; k < sourceProofAux.size(); k++) {
-                System.out.println((k + 1) + ") " + basis.get(k) + " " + sourceProofAux.get(k).toString());
+                System.out.println((k + 1) + ") " +  sourceProofAux.get(k).toString() + " " +  basis.get(k));
             }
 
 

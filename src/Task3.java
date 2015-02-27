@@ -60,7 +60,7 @@ public class Task3 {
             }
 
             for (int i = 1; i < counter; i *= 2) {
-                for (int j = 0; j < counter - 1; j += varCount) {
+                for (int j = 0; j < counter - i; j += varCount) {
                     ArrayList<Expression> first = new ArrayList<Expression>(interProofs[j]);
                     interProofs[j].clear();
                     interProofs[j] = new ArrayList<Expression>(mergeProofs(statement, first, interProofs[j + i], variablesAux, i, proofs));
@@ -110,7 +110,10 @@ public class Task3 {
         Expression firstAuxSt = new Implication(asmp, excludedThirdResult);
 
         result.add(firstAuxSt);
-        ArrayList<Expression> contraposition = proofs.getContraposition();
+        ArrayList<Expression> contraposition = new ArrayList<Expression>();
+        for (Expression e : proofs.getContraposition()) {
+            contraposition.add(e.clone());
+        }
         proofs.changeVariablesInList(contraposition, asmp, excludedThirdResult);
         result.addAll(contraposition);
 
@@ -121,7 +124,10 @@ public class Task3 {
         Expression secondAuxSt = new Implication(new Not(asmp), excludedThirdResult);
         result.add(secondAuxSt);
         contraposition.clear();
-        Collections.copy(contraposition, proofs.getContraposition());
+
+        for (Expression e : proofs.getContraposition()) {
+            contraposition.add(e.clone());
+        }
         proofs.changeVariablesInList(contraposition, new Not(asmp), excludedThirdResult);
         result.addAll(contraposition);
 
@@ -135,7 +141,11 @@ public class Task3 {
         result.add(axioms.createAxiom10(excludedThirdResult));
         result.add(excludedThirdResult);
 
-        ArrayList<Expression> exclusion = proofs.getExclusion();
+
+        ArrayList<Expression> exclusion = new ArrayList<Expression>();
+        for (Expression e : proofs.getExclusion()) {
+            exclusion.add(e.clone());
+        }
         proofs.changeVariablesInList(exclusion, statement, asmp);
 
         result.addAll(exclusion);
