@@ -63,7 +63,7 @@ public class Task3 {
                 for (int j = 0; j < counter - i; j += varCount) {
                     ArrayList<Expression> first = new ArrayList<Expression>(interProofs[j]);
                     interProofs[j].clear();
-                    interProofs[j] = new ArrayList<Expression>(mergeProofs(statement, first, interProofs[j + i], variablesAux, i, proofs));
+                    interProofs[j] = new ArrayList<Expression>(mergeProofs(parser, statement, first, interProofs[j + i], variablesAux, i, proofs));
                 }
             }
 
@@ -84,8 +84,7 @@ public class Task3 {
         return ans;
     }
 
-    public ArrayList<Expression> mergeProofs(Expression statement, ArrayList<Expression> first, ArrayList<Expression> second, ArrayList<String> variables, int d, Proofs proofs) throws ParseException{
-        Parser parser = new Parser();
+    public ArrayList<Expression> mergeProofs(Parser parser, Expression statement, ArrayList<Expression> first, ArrayList<Expression> second, ArrayList<String> variables, int d, Proofs proofs) throws ParseException{
         ArrayList<Expression> result = new ArrayList<Expression>();
         String binary = Integer.toBinaryString(d + (2 << 30)).substring(1);
         int var = binary.length() - binary.indexOf("1") - 1;
@@ -101,8 +100,8 @@ public class Task3 {
             secondAux.put(second.get(i), i + 1);
         }
 
-        result.addAll(deduction(new Not(asmp), firstAux, first));
-        result.addAll(deduction(asmp, secondAux, second));
+        result.addAll(deduction(parser, new Not(asmp), firstAux, first));
+        result.addAll(deduction(parser, asmp, secondAux, second));
 
         Axioms axioms = new Axioms();
 
@@ -153,8 +152,7 @@ public class Task3 {
         return result;
     }
 
-    public ArrayList<Expression> deduction(Expression asmp, HashMap<Expression, Integer> sourceProof, ArrayList<Expression> sourceProofAux) {
-        Parser parser = new Parser();
+    public ArrayList<Expression> deduction(Parser parser, Expression asmp, HashMap<Expression, Integer> sourceProof, ArrayList<Expression> sourceProofAux) {
 
         // sourceMP stores all implications divided in two parts (key - alpha, value - beta)
         HashMap<Expression, Expression> sourcesMP = new HashMap<Expression, Expression>();

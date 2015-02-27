@@ -4,7 +4,10 @@ import resources.Axioms;
 import resources.Parser;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Scanner;
 
 
 /**
@@ -81,9 +84,7 @@ public class Task2 {
                         proof.put(new Implication(asmp, expr), ++i);
                         proofAux.add(new Implication(asmp, expr));
                         basis.add("M.P. " + (i - 2) + ", " + (i - 1));
-                    }
-
-                    else if (alpha.contains(expr)) {
+                    } else if (alpha.contains(expr)) {
 
                         // if we are looking at assumption, that is not last assumption in list, we can meet some other assumptions, which weren't inspected yet
                         if (!expr.equals(asmp)) {
@@ -117,9 +118,7 @@ public class Task2 {
                         proof.put(resultFinishExpr, ++i);
                         proofAux.add(resultFinishExpr);
                         basis.add("M.P. " + (i - 1) + ", " + (i - 2));
-                    }
-
-                    else if (resultMP.containsKey(expr)) {
+                    } else if (resultMP.containsKey(expr)) {
                         Expression result = new Implication(asmp, expr);
                         Expression deltaJ = sourceProofAux.get(resultMP.get(expr).first - 1);
                         Expression deltaK = new Implication(deltaJ, expr);
@@ -139,9 +138,7 @@ public class Task2 {
                         proof.put(result, ++i);
                         proofAux.add(result);
                         basis.add("M.P. " + proof.get(auxK) + ", " + (i - 1));
-                    }
-
-                    else if (alpha.contains(expr)) {
+                    } else if (alpha.contains(expr)) {
                         proof.put(expr, ++i);
                         proofAux.add(expr);
                     }
@@ -170,7 +167,7 @@ public class Task2 {
 
 
             for (int k = 0; k < sourceProofAux.size(); k++) {
-                System.out.println((k + 1) + ") " +  sourceProofAux.get(k).toString() + " " +  basis.get(k));
+                System.out.println((k + 1) + ") " + sourceProofAux.get(k).toString() + " " + basis.get(k));
             }
 
 
