@@ -22,6 +22,7 @@ public class Task2 {
         Scanner in;
         try {
             Parser parser = new Parser();
+            Axioms axioms = new Axioms();
 
             in = new Scanner(new File("tsk2.in"));
             String assumption = in.next().replace("->", ">");
@@ -52,7 +53,6 @@ public class Task2 {
             // arrayList of statements, which prove that current expression is true
             ArrayList<String> basis = new ArrayList<String>();
 
-            Axioms axioms = new Axioms();
 
             while (in.hasNext()) {
                 j++;
@@ -70,7 +70,7 @@ public class Task2 {
                 // basis is interesting only after last iteration (absolutely completes proof)
                 basis.clear();
                 for (Expression expr : sourceProofAux) {
-                    int a = parser.isAxiom(expr);
+                    int a = axioms.isAxiom(expr);
 
                     if (a > 0) {
                         proof.put(expr, ++i);
@@ -157,9 +157,9 @@ public class Task2 {
                 }
 
                 // current proof is new source proof, and we should continue completing it
-                sourceProof = new HashMap<Expression, Integer>(proof);
+                sourceProof = new HashMap<>(proof);
                 proof.clear();
-                sourceProofAux = new ArrayList<Expression>(proofAux);
+                sourceProofAux = new ArrayList<>(proofAux);
                 proofAux.clear();
                 resultMP.clear();
                 sourcesMP.clear();

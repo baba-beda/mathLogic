@@ -9,6 +9,7 @@ import resources.Proofs;
 import java.io.File;
 import java.text.ParseException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by daria on 15.01.15.
@@ -124,9 +125,9 @@ public class Task3 {
         result.add(secondAuxSt);
         contraposition.clear();
 
-        for (Expression e : proofs.getContraposition()) {
-            contraposition.add(e.clone());
-        }
+        contraposition.addAll(proofs.getContraposition().stream().
+                map(Expression::clone).
+                collect(Collectors.toList()));
         proofs.changeVariablesInList(contraposition, new Not(asmp), excludedThirdResult);
         result.addAll(contraposition);
 
@@ -141,10 +142,9 @@ public class Task3 {
         result.add(excludedThirdResult);
 
 
-        ArrayList<Expression> exclusion = new ArrayList<Expression>();
-        for (Expression e : proofs.getExclusion()) {
-            exclusion.add(e.clone());
-        }
+        ArrayList<Expression> exclusion = proofs.getExclusion().stream().
+                map(Expression::clone).
+                collect(Collectors.toCollection(ArrayList::new));
         proofs.changeVariablesInList(exclusion, statement, asmp);
 
         result.addAll(exclusion);
@@ -169,7 +169,7 @@ public class Task3 {
         int i = 0;
         try {
             for (Expression expr : sourceProofAux) {
-                int a = parser.isAxiom(expr);
+                int a = axioms.isAxiom(expr);
 
                 if (a > 0) {
                     proof.put(expr, ++i);

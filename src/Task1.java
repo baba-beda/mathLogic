@@ -1,5 +1,6 @@
 import expression.Expression;
 import expression.Implication;
+import resources.Axioms;
 import resources.Parser;
 
 import java.io.File;
@@ -15,19 +16,28 @@ public class Task1 {
         Scanner in;
         try {
             Parser parser = new Parser();
+            Axioms axioms = new Axioms();
 
-            // here is the name of test-file, but i don't now its exact name
-            in = new Scanner(new File("test.in"));
+            // here is the name of test-file, but i don't know its exact name
+            in = new Scanner(new File("good1.in"));
 
             // number of current statement
             int i = 0;
 
+            // here we store the whole proof
+            // key - expression (to easily get its number and check whether proof contains a statement)
+            // value - integer (the number of the list of statements called proof)
             HashMap<Expression, Integer> proof = new HashMap<Expression, Integer>();
 
+            // here we store expression that are in the form alpha -> beta
+            // key - expression alpha
+            // value - expression beta
             HashMap<Expression, Expression> sourcesMP = new HashMap<Expression, Expression>();
 
+            // here we store beta which was proven with MP
+            // key - expression beta
+            // value - pair of indices of expression alpha and expression alpha->beta in proof
             HashMap<Expression, Pair> resultMP = new HashMap<Expression, Pair>();
-
 
             boolean correct = true;
 
@@ -35,18 +45,21 @@ public class Task1 {
                 i++;
 
                 String statement = in.next();
+
                 // it's more comfortable to to have all operators of one symbol
                 statement = statement.replace("->", ">");
 
                 Expression expr = parser.parse(statement);
 
+                // basis that says why current expression is correct
                 String basis = "";
 
                 proof.put(expr, i);
 
 
                 // checking if current statement is an axiom
-                int a = parser.isAxiom();
+                // a - number of axiom
+                int a = axioms.isAxiom(expr);
 
                 boolean isAxiom = false;
                 boolean isMP = false;
