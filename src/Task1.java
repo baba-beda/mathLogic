@@ -4,6 +4,8 @@ import resources.Axioms;
 import resources.Parser;
 
 import java.io.File;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -13,98 +15,100 @@ public class Task1 {
     }
 
     public void solve() {
-        Scanner in;
-        try {
+        try (Scanner in = new Scanner(new File("proofs" + File.separator + "SelfImpl.txt"))) {
             Parser parser = new Parser();
-            Axioms axioms = new Axioms();
-
-            // here is the name of test-file, but i don't know its exact name
-            in = new Scanner(new File("good1.in"));
-
-            // number of current statement
-            int i = 0;
 
             // here we store the whole proof
             // key - expression (to easily get its number and check whether proof contains a statement)
             // value - integer (the number of the list of statements called proof)
-            HashMap<Expression, Integer> proof = new HashMap<Expression, Integer>();
+            HashMap<Expression, Integer> proof = new HashMap<>();
+            ArrayList<Expression> proofAux = new ArrayList<>();
 
-            // here we store expression that are in the form alpha -> beta
-            // key - expression alpha
-            // value - expression beta
-            HashMap<Expression, Expression> sourcesMP = new HashMap<Expression, Expression>();
-
-            // here we store beta which was proven with MP
-            // key - expression beta
-            // value - pair of indices of expression alpha and expression alpha->beta in proof
-            HashMap<Expression, Pair> resultMP = new HashMap<Expression, Pair>();
-
-            boolean correct = true;
+            int i = 1;
 
             while (in.hasNext()) {
-                i++;
-
                 String statement = in.next();
 
                 // it's more comfortable to to have all operators of one symbol
                 statement = statement.replace("->", ">");
 
                 Expression expr = parser.parse(statement);
-
-                // basis that says why current expression is correct
-                String basis = "";
-
                 proof.put(expr, i);
+                proofAux.add(expr);
 
-
-                // checking if current statement is an axiom
-                // a - number of axiom
-                int a = axioms.isAxiom(expr);
-
-                boolean isAxiom = false;
-                boolean isMP = false;
-
-                if (a != 0) {
-                    isAxiom = true;
-                    basis = "axiom " + a;
-                }
-
-
-                if (resultMP.containsKey(expr)) {
-                    isMP = true;
-                    basis = "M.P. " + resultMP.get(expr).first + ", " + resultMP.get(expr).second;
-                }
-
-                if (sourcesMP.containsKey(expr)) {
-                    resultMP.put(sourcesMP.get(expr), new Pair(i, proof.get(new Implication(expr, sourcesMP.get(expr)))));
-                }
-
-                if (expr instanceof Implication) {
-                    sourcesMP.put(((Implication) expr).left, ((Implication) expr).right);
-                    if (proof.containsKey(((Implication) expr).left)) {
-                        resultMP.put(((Implication) expr).right, new Pair(proof.get(((Implication) expr).left), i));
-                    }
-                }
-
-
-                if (!isAxiom && !isMP) {
-                    System.out.println(i + ")" + expr.toString() + " " + "Unproved");
-                    correct = false;
-                    System.out.print("Proof is incorrect from the statement number " + i);
-                    break;
-                }
-
-                System.out.println(i + ") " + expr.toString() + " " + basis);
-
-
+                i++;
             }
-            if (correct) {
-                System.out.println("Proof is correct");
-            }
+
+            giveBasis(proof, proofAux).forEach(System.out::println);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    ArrayList<String> giveBasis(HashMap<Expression, Integer> proof, ArrayList<Expression> proofAux) throws ParseException {
+        // here we store expression that are in the form alpha -> beta
+        // key - expression alpha
+        // value - expression beta
+        HashMap<Expression, Expression> sourcesMP = new HashMap<>();
+
+        // here we store beta which was proven with MP
+        // key - expression beta
+        // value - pair of indices of expression alpha and expression alpha->beta in proof
+        HashMap<Expression, Pair> resultMP = new HashMap<>();
+
+        ArrayList<String> proofWithBasis = new ArrayList<>();
+        Axioms axioms = new Axioms();
+
+        int i = 1;
+        boolean correct = true;
+        for (Expression expr : proofAux) {
+            // checking if current statement is an axiom
+            // a - number of axiom
+            int a = axioms.isAxiom(expr);
+
+            boolean isAxiom = false;
+            boolean isMP = false;
+
+            String basis = "";
+            if (a != 0) {
+                isAxiom = true;
+                basis = "axiom " + a;
+            }
+
+
+            if (resultMP.containsKey(expr)) {
+                isMP = true;
+                basis = "M.P. " + resultMP.get(expr).first + ", " + resultMP.get(expr).second;
+            }
+
+            if (sourcesMP.containsKey(expr)) {
+                resultMP.put(sourcesMP.get(expr), new Pair(i, proof.get(new Implication(expr, sourcesMP.get(expr)))));
+            }
+
+            if (expr instanceof Implication) {
+                sourcesMP.put(((Implication) expr).left, ((Implication) expr).right);
+                if (proof.containsKey(((Implication) expr).left)) {
+                    resultMP.put(((Implication) expr).right, new Pair(proof.get(((Implication) expr).left), i));
+                }
+            }
+
+
+            if (!isAxiom && !isMP) {
+                correct = false;
+                proofWithBasis.add(i + ") " + expr.toString() + " " + "Unproved");
+                proofWithBasis.add("Proof is incorrect from the statement number " + i);
+                break;
+            }
+
+            proofWithBasis.add(i + ") " + expr.toString() + " " + basis);
+            i++;
+        }
+
+        if (correct) {
+            proofWithBasis.add("Proof is correct");
+        }
+        return proofWithBasis;
     }
 
     class Pair {

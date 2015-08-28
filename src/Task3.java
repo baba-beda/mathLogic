@@ -33,14 +33,11 @@ public class Task3 {
 
             HashMap<String, Integer> variables = statement.getVariablesAux();
 
-            ArrayList<String> variablesAux = new ArrayList<String>();
-
-            for (Map.Entry<String, Integer> entry : variables.entrySet()) {
-                variablesAux.add(entry.getKey());
-            }
+            ArrayList<String> variablesAux = variables.entrySet().stream().
+                    map(Map.Entry::getKey).
+                    collect(Collectors.toCollection(ArrayList::new));
 
             int counter = pow(varCount);
-
 
 
             for (int i = 0; i < counter; i++) {
@@ -57,14 +54,14 @@ public class Task3 {
             ArrayList<Expression>[] interProofs = new ArrayList[counter];
 
             for (int bitMask = 0; bitMask < counter; bitMask++) {
-                interProofs[bitMask] = new ArrayList<Expression>(statement.prove(bitMask, proofs));
+                interProofs[bitMask] = new ArrayList<>(statement.prove(bitMask, proofs));
             }
 
             for (int i = 1; i < counter; i *= 2) {
                 for (int j = 0; j < counter - i; j += varCount) {
-                    ArrayList<Expression> first = new ArrayList<Expression>(interProofs[j]);
+                    ArrayList<Expression> first = new ArrayList<>(interProofs[j]);
                     interProofs[j].clear();
-                    interProofs[j] = new ArrayList<Expression>(mergeProofs(parser, statement, first, interProofs[j + i], variablesAux, i, proofs));
+                    interProofs[j] = new ArrayList<>(mergeProofs(parser, statement, first, interProofs[j + i], variablesAux, i, proofs));
                 }
             }
 
@@ -85,24 +82,24 @@ public class Task3 {
         return ans;
     }
 
-    public ArrayList<Expression> mergeProofs(Parser parser, Expression statement, ArrayList<Expression> first, ArrayList<Expression> second, ArrayList<String> variables, int d, Proofs proofs) throws ParseException{
-        ArrayList<Expression> result = new ArrayList<Expression>();
+    public ArrayList<Expression> mergeProofs(Parser parser, Expression statement, ArrayList<Expression> first, ArrayList<Expression> second, ArrayList<String> variables, int d, Proofs proofs) throws ParseException {
+        ArrayList<Expression> result = new ArrayList<>();
         String binary = Integer.toBinaryString(d + (2 << 30)).substring(1);
         int var = binary.length() - binary.indexOf("1") - 1;
         String variable = variables.get(var);
         Expression asmp = parser.parse(variable);
 
-        HashMap<Expression, Integer> firstAux = new HashMap<Expression, Integer>();
+        HashMap<Expression, Integer> firstAux = new HashMap<>();
         for (int i = 0; i < first.size(); i++) {
             firstAux.put(first.get(i), i + 1);
         }
-        HashMap<Expression, Integer> secondAux = new HashMap<Expression, Integer>();
+        HashMap<Expression, Integer> secondAux = new HashMap<>();
         for (int i = 0; i < second.size(); i++) {
             secondAux.put(second.get(i), i + 1);
         }
 
-        result.addAll(deduction(parser, new Not(asmp), firstAux, first));
-        result.addAll(deduction(parser, asmp, secondAux, second));
+       /* result.addAll(deduction(new Not(asmp), firstAux, first));
+        result.addAll(deduction(asmp, secondAux, second));*/
 
         Axioms axioms = new Axioms();
 
@@ -110,10 +107,9 @@ public class Task3 {
         Expression firstAuxSt = new Implication(asmp, excludedThirdResult);
 
         result.add(firstAuxSt);
-        ArrayList<Expression> contraposition = new ArrayList<Expression>();
-        for (Expression e : proofs.getContraposition()) {
-            contraposition.add(e.clone());
-        }
+        ArrayList<Expression> contraposition = proofs.getContraposition().stream().
+                map(Expression::clone).
+                collect(Collectors.toCollection(ArrayList::new));
         proofs.changeVariablesInList(contraposition, asmp, excludedThirdResult);
         result.addAll(contraposition);
 
@@ -152,16 +148,16 @@ public class Task3 {
         return result;
     }
 
-    public ArrayList<Expression> deduction(Parser parser, Expression asmp, HashMap<Expression, Integer> sourceProof, ArrayList<Expression> sourceProofAux) {
+    /*public ArrayList<Expression> deduction(Expression asmp, HashMap<Expression, Integer> sourceProof, ArrayList<Expression> sourceProofAux) {
 
         // sourceMP stores all implications divided in two parts (key - alpha, value - beta)
-        HashMap<Expression, Expression> sourcesMP = new HashMap<Expression, Expression>();
+        HashMap<Expression, Expression> sourcesMP = new HashMap<>();
         // resultMP stores all betas, which are true (so we had alpha in proof)
-        HashMap<Expression, Pair> resultMP = new HashMap<Expression, Pair>();
+        HashMap<Expression, Pair> resultMP = new HashMap<>();
 
         // proof and proofAux store current completed proof
-        HashMap<Expression, Integer> proof = new HashMap<Expression, Integer>();
-        ArrayList<Expression> proofAux = new ArrayList<Expression>();
+        HashMap<Expression, Integer> proof = new HashMap<>();
+        ArrayList<Expression> proofAux = new ArrayList<>();
 
 
         Axioms axioms = new Axioms();
@@ -244,8 +240,8 @@ public class Task3 {
 
         return proofAux;
     }
-
-    public class Pair{
+*/
+    public class Pair {
         int first, second;
 
         public Pair(int first, int second) {

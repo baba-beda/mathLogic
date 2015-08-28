@@ -4,6 +4,8 @@ import resources.Axioms;
 import resources.Parser;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,12 +21,11 @@ public class Task2 {
     }
 
     void solve() {
-        Scanner in;
-        try {
-            Parser parser = new Parser();
-            Axioms axioms = new Axioms();
 
-            in = new Scanner(new File("tsk2.in"));
+        try(Scanner in = new Scanner(new File("tests" + File.separator + "HW2" + File.separator + "contra.in"));
+            PrintWriter out = new PrintWriter("result" + File.separator + "contra.out")) {
+            Parser parser = new Parser();
+
             String assumption = in.next().replace("->", ">");
 
             ArrayList<Expression> alpha = parser.parseAlpha(assumption);
@@ -35,24 +36,10 @@ public class Task2 {
             // number of current expression in source proof
             int j = 0;
 
-
             // hashMap for fast operations, and arrayList for saving natural order;
             // both of them contain current proof, which we should complete to correct
-            HashMap<Expression, Integer> sourceProof = new HashMap<Expression, Integer>();
-            ArrayList<Expression> sourceProofAux = new ArrayList<Expression>();
-
-            // sourceMP stores all implications divided in two parts (key - alpha, value - beta)
-            HashMap<Expression, Expression> sourcesMP = new HashMap<Expression, Expression>();
-            // resultMP stores all betas, which are true (so we had alpha in proof)
-            HashMap<Expression, Pair> resultMP = new HashMap<Expression, Pair>();
-
-            // proof and proofAux store current completed proof
-            HashMap<Expression, Integer> proof = new HashMap<Expression, Integer>();
-            ArrayList<Expression> proofAux = new ArrayList<Expression>();
-
-            // arrayList of statements, which prove that current expression is true
-            ArrayList<String> basis = new ArrayList<String>();
-
+            HashMap<Expression, Integer> sourceProof = new HashMap<>();
+            ArrayList<Expression> sourceProofAux = new ArrayList<>();
 
             while (in.hasNext()) {
                 j++;
@@ -62,6 +49,9 @@ public class Task2 {
                 sourceProof.put(expr, j);
                 sourceProofAux.add(expr);
             }
+
+            ArrayList<Expression> proof = deduction(alpha, sourceProof, sourceProofAux);
+           /*
 
             // sequentially complete proof with all assumptions
             for (Expression asmp : alpha) {
@@ -165,9 +155,10 @@ public class Task2 {
                 sourcesMP.clear();
             }
 
-
+*/
             for (int k = 0; k < sourceProofAux.size(); k++) {
-                System.out.println((k + 1) + ") " + sourceProofAux.get(k).toString() + " " + basis.get(k));
+                System.out.println((k + 1) + ") " + sourceProofAux.get(k).toString());
+                out.println(sourceProofAux.get(k).toString());
             }
 
 
@@ -175,6 +166,38 @@ public class Task2 {
             e.printStackTrace();
         }
 
+    }
+
+    public ArrayList<Expression> deduction(ArrayList<Expression> assumptions, HashMap<Expression, Integer> sourceProof, ArrayList<Expression> sourceProofAux) throws ParseException {
+        Axioms axioms = new Axioms();
+        // sourceMP stores all implications divided in two parts (key - alpha, value - beta)
+        HashMap<Expression, Expression> sourcesMP = new HashMap<Expression, Expression>();
+        // resultMP stores all betas, which are true (so we had alpha in proof)
+        HashMap<Expression, Pair> resultMP = new HashMap<Expression, Pair>();
+
+        // proof and proofAux store current completed proof
+        HashMap<Expression, Integer> proof = new HashMap<Expression, Integer>();
+        ArrayList<Expression> proofAux = new ArrayList<Expression>();
+
+
+        for (Expression asmp : assumptions) {
+            int i = 0;
+            for (Expression expr : sourceProofAux) {
+                int a = axioms.isAxiom(expr);
+                if (a > 0) {
+                    proof.put(expr, ++i);
+                    proofAux.add(expr);
+
+                    proof.put(axioms.createAxiom1(expr, asmp), ++i);
+                    proofAux.add(axioms.createAxiom1(expr, asmp));
+
+                    proof.put(new Implication(asmp, expr), ++i);
+                    proofAux.add(new Implication(asmp, expr));
+                }
+
+            }
+        }
+        return proofAux;
     }
 
     class Pair {
